@@ -13,3 +13,19 @@ void lab_init(int n) {
         assert(all_labs[i].name);
     }
 }
+
+void *lab_process(void *input) {
+    Lab *lab = (Lab *) input;
+    int found = 1;
+    while (found) {
+        found = 0;
+        for (int i = 0; i < lab->numTA; i++) {
+            if (lab->taTimes[i] < lab->TALimit) {
+                found = 1;
+                break;
+            }
+        }
+    }
+    printf("Lab %s no longer has students available for TAship\n", lab->name);
+    pthread_exit(NULL);
+}
