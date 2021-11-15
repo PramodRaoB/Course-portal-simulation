@@ -17,11 +17,10 @@ int main() {
 
     for (int i = 0; i < num_courses; i++) {
         scanf("%s %lf %d", all_courses[i].name, &all_courses[i].interestQuotient, &all_courses[i].course_max_slots);
-        int numValidLabs;
-        scanf("%d", &numValidLabs);
-        all_courses[i].validLabs = (int *) malloc(numValidLabs * sizeof(int));
+        scanf("%d", &all_courses[i].numValidLabs);
+        all_courses[i].validLabs = (int *) malloc(all_courses[i].numValidLabs * sizeof(int));
         assert(all_courses[i].validLabs);
-        for (int j = 0; j < numValidLabs; j++)
+        for (int j = 0; j < all_courses[i].numValidLabs; j++)
             scanf("%d", &all_courses[i].validLabs[j]);
     }
 
@@ -41,6 +40,12 @@ int main() {
         for (int j = 0; j < all_labs[i].numTA; j++) {
             pthread_mutex_init(&all_labs[i].taLock[j], NULL);
         }
+    }
+
+    pthread_t *courseThreads = (pthread_t *) malloc(num_courses * sizeof(pthread_t));
+    assert(courseThreads);
+    for (int i = 0; i < num_courses; i++) {
+        pthread_create(&courseThreads[i], NULL, course_process, &all_courses[i]);
     }
 
     pthread_t *labThreads = (pthread_t *) malloc(num_labs * sizeof(pthread_t));

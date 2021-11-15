@@ -9,6 +9,7 @@ void lab_init(int n) {
     assert(all_labs);
     for (int i = 0; i < n; i++) {
         all_labs[i].id = i;
+        all_labs[i].available = 1;
         all_labs[i].name = (char *) malloc(MAX_LAB_NAME);
         assert(all_labs[i].name);
     }
@@ -27,5 +28,6 @@ void *lab_process(void *input) {
         }
     }
     printf("Lab %s no longer has students available for TAship\n", lab->name);
+    lab->available = 0;
     pthread_exit(NULL);
 }

@@ -11,6 +11,7 @@ struct lab {
     int numTA;
     int TALimit;
     int *taTimes;
+    int available;
     pthread_mutex_t *taLock;
 };
 
