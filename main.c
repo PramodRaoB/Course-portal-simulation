@@ -42,6 +42,11 @@ int main() {
         }
     }
 
+    pthread_t *studentThreads = (pthread_t *) malloc(num_students * sizeof(pthread_t));
+    assert(studentThreads);
+    for (int i = 0; i < num_students; i++)
+        pthread_create(&studentThreads[i], NULL, student_process, &all_students[i]);
+
     pthread_t *courseThreads = (pthread_t *) malloc(num_courses * sizeof(pthread_t));
     assert(courseThreads);
     for (int i = 0; i < num_courses; i++) {

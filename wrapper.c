@@ -30,3 +30,15 @@ int Pthread_cond_signal(pthread_cond_t *p) {
     assert(rc == 0);
     return 0;
 }
+
+int Pthread_cond_broadcast(pthread_cond_t *p) {
+    int rc = pthread_cond_broadcast(p);
+    assert(rc == 0);
+    return 0;
+}
+
+int Pthread_cond_wait(pthread_cond_t *p, pthread_mutex_t *x) {
+    int rc = pthread_cond_wait(p, x);
+    assert(rc == 0);
+    return 0;
+}

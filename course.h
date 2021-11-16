@@ -11,8 +11,12 @@ struct course {
     int numValidLabs;
     int *validLabs;
     int prefer;
-    pthread_cond_t tutorialSlots;
+    pthread_mutex_t courseLock;
+    pthread_cond_t tutCond;
+    pthread_cond_t openCond;
+    int tutSlots;
     pthread_mutex_t tutLock;
+    int withdrawn;
 };
 
 typedef struct course Course;
