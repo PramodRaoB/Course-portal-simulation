@@ -25,11 +25,17 @@ void *student_process(void *input) {
     int found = 0;
     for (int i = 0; i < 3 && !found; i++) {
         Course *course = &all_courses[student->preference[i]];
+        if (course->withdrawn) {
+            if (i < 2)
+                printf(C_STUDENT "Student %d changed current preference from course %s (priority %d) to course %s (priority %d)\n" RESET, student->id, course->name, i + 1, all_courses[student->preference[i + 1]].name, i + 2);
+            else
+                printf(C_STUDENT "Student %d couldn't get any of his preferred courses\n" RESET, student->id);
+            continue;
+        }
         Pthread_mutex_lock(&course->courseLock);
         course->prefer++;
         Pthread_cond_wait(&course->openCond, &course->courseLock);
         course->prefer--;
-        course->tutSlots++;
         //might have gotten because of broadcast
         if (course->withdrawn) {
             Pthread_mutex_unlock(&course->courseLock);
@@ -37,11 +43,13 @@ void *student_process(void *input) {
                 printf(C_STUDENT "Student %d changed current preference from course %s (priority %d) to course %s (priority %d)\n" RESET, student->id, course->name, i + 1, all_courses[student->preference[i + 1]].name, i + 2);
             else
                 printf(C_STUDENT "Student %d couldn't get any of his preferred courses\n" RESET, student->id);
+            continue;
         }
         printf(C_STUDENT "Student %d has been allocated a seat in course %s\n" RESET, student->id, course->name);
         Pthread_mutex_unlock(&course->courseLock);
 
         Pthread_mutex_lock(&course->tutLock);
+        course->tutSlots++;
         Pthread_cond_wait(&course->tutCond, &course->tutLock);
         Pthread_mutex_unlock(&course->tutLock);
 

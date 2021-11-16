@@ -58,4 +58,15 @@ int main() {
     for (int i = 0; i < num_labs; i++) {
         pthread_create(&labThreads[i], NULL, lab_process, &all_labs[i]);
     }
+
+    for (int i = 0; i < num_students; i++) {
+        pthread_join(studentThreads[i], NULL);
+    }
+    for (int i = 0; i < num_labs; i++) {
+        pthread_cancel(labThreads[i]);
+    }
+    for (int i = 0; i < num_courses; i++) {
+        pthread_cancel(courseThreads[i]);
+    }
+    return 0;
 }

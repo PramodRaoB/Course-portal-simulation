@@ -1,6 +1,7 @@
 #include <malloc.h>
 #include <assert.h>
 #include "lab.h"
+#include "globals.h"
 
 Lab *all_labs;
 
@@ -27,7 +28,7 @@ void *lab_process(void *input) {
             }
         }
     }
-    printf("Lab %s no longer has students available for TAship\n", lab->name);
+    printf(C_LAB "Lab %s no longer has students available for TAship\n" RESET, lab->name);
     lab->available = 0;
-    pthread_exit(NULL);
+    return NULL;
 }
