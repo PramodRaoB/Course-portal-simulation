@@ -21,6 +21,8 @@ void course_init(int n) {
         Pthread_mutex_init(&all_courses[i].courseLock, NULL);
         Pthread_cond_init(&all_courses[i].tutCond, NULL);
         Pthread_cond_init(&all_courses[i].openCond, NULL);
+        Pthread_cond_init(&all_courses[i].emptyCond, NULL);
+        Pthread_cond_init(&all_courses[i].fullCond, NULL);
         all_courses[i].name = (char *) malloc(MAX_COURSE_NAME);
         assert(all_courses[i].name);
     }
@@ -31,13 +33,20 @@ void take_tutorial(Course *course) {
     printf(C_COURSE "Course %s has been allocated %d seats\n" RESET, course->name, pickSlots);
     Pthread_mutex_lock(&course->courseLock);
     int numAttendingTut = MIN(course->prefer, pickSlots);
-    for (int i = 0; i < numAttendingTut; i++) {
-        Pthread_cond_signal(&course->openCond);
-    }
     Pthread_mutex_unlock(&course->courseLock);
 
+    for (int i = 0; i < pickSlots; i++) {
+        Pthread_mutex_lock(&course->courseLock);
+        Pthread_cond_signal(&course->openCond);
+        Pthread_mutex_unlock(&course->courseLock);
+    }
+
+    Pthread_mutex_lock(&course->tutLock);
+    while(numAttendingTut != course->tutSlots)
+        Pthread_cond_wait(&course->fullCond, &course->tutLock);
+    Pthread_mutex_unlock(&course->tutLock);
+
     Pthread_mutex_lock(&course->courseLock);
-    while(course->tutSlots < numAttendingTut);
     printf(C_COURSE "Tutorial has started for course %s with %d filled out of %d\n" RESET, course->name, course->tutSlots, pickSlots);
     sleep(2);
     Pthread_mutex_lock(&course->tutLock);
@@ -59,6 +68,10 @@ void *course_process(void *input) {
             if (!currentLab.available) continue;
             for (int j = 0; j < currentLab.numTA; j++) {
                 if (currentLab.taTimes[j] == currentLab.TALimit) continue;
+                Pthread_mutex_lock(&course->courseLock);
+                while (course->prefer == 0)
+                    Pthread_cond_wait(&course->emptyCond, &course->courseLock);
+                Pthread_mutex_unlock(&course->courseLock);
                 Pthread_mutex_lock(&currentLab.taLock[j]);
                 found = 1;
                 if (currentLab.taTimes[j] == currentLab.TALimit) {

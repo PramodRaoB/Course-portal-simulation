@@ -34,6 +34,8 @@ void *student_process(void *input) {
         }
         Pthread_mutex_lock(&course->courseLock);
         course->prefer++;
+        if (course->prefer == 1)
+            Pthread_cond_signal(&course->emptyCond);
         Pthread_cond_wait(&course->openCond, &course->courseLock);
         course->prefer--;
         //might have gotten because of broadcast
@@ -50,6 +52,7 @@ void *student_process(void *input) {
 
         Pthread_mutex_lock(&course->tutLock);
         course->tutSlots++;
+        Pthread_cond_signal(&course->fullCond);
         Pthread_cond_wait(&course->tutCond, &course->tutLock);
         Pthread_mutex_unlock(&course->tutLock);
 

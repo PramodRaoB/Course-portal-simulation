@@ -3,7 +3,8 @@
 
 #define MIN(a, b) (a < b) ? a : b
 
-#define C_STUDENT     "\x1b[31m"
+//#define C_STUDENT     "\x1b[31m"
+#define C_STUDENT     "\x1b[35m"
 #define C_LAB   "\x1b[32m"
 #define C_COURSE  "\x1b[33m"
 #define ANSI_COLOR_BLUE    "\x1b[34m"

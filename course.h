@@ -17,6 +17,8 @@ struct course {
     int tutSlots;
     pthread_mutex_t tutLock;
     int withdrawn;
+    pthread_cond_t emptyCond;
+    pthread_cond_t fullCond;
 };
 
 typedef struct course Course;
