@@ -35,7 +35,7 @@ void take_tutorial(Course *course) {
     int numAttendingTut = MIN(course->prefer, pickSlots);
     Pthread_mutex_unlock(&course->courseLock);
 
-    for (int i = 0; i < pickSlots; i++) {
+    for (int i = 0; i < numAttendingTut; i++) {
         Pthread_mutex_lock(&course->courseLock);
         Pthread_cond_signal(&course->openCond);
         Pthread_mutex_unlock(&course->courseLock);

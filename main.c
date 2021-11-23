@@ -5,7 +5,7 @@
 #include "student.h"
 #include "course.h"
 #include "lab.h"
-#include "globals.h"
+#include "wrapper.h"
 
 int num_students, num_labs, num_courses;
 
@@ -37,36 +37,33 @@ int main() {
         assert(all_labs[i].taTimes);
         all_labs[i].taLock = (pthread_mutex_t *) malloc(all_labs[i].numTA * sizeof(pthread_mutex_t));
         assert(all_labs[i].taLock);
-        for (int j = 0; j < all_labs[i].numTA; j++) {
-            pthread_mutex_init(&all_labs[i].taLock[j], NULL);
-        }
+        for (int j = 0; j < all_labs[i].numTA; j++)
+            Pthread_mutex_init(&all_labs[i].taLock[j], NULL);
     }
 
     pthread_t *studentThreads = (pthread_t *) malloc(num_students * sizeof(pthread_t));
     assert(studentThreads);
     for (int i = 0; i < num_students; i++)
-        pthread_create(&studentThreads[i], NULL, student_process, &all_students[i]);
+        Pthread_create(&studentThreads[i], NULL, student_process, &all_students[i]);
 
     pthread_t *courseThreads = (pthread_t *) malloc(num_courses * sizeof(pthread_t));
     assert(courseThreads);
-    for (int i = 0; i < num_courses; i++) {
-        pthread_create(&courseThreads[i], NULL, course_process, &all_courses[i]);
-    }
+    for (int i = 0; i < num_courses; i++)
+        Pthread_create(&courseThreads[i], NULL, course_process, &all_courses[i]);
 
     pthread_t *labThreads = (pthread_t *) malloc(num_labs * sizeof(pthread_t));
     assert(labThreads);
-    for (int i = 0; i < num_labs; i++) {
-        pthread_create(&labThreads[i], NULL, lab_process, &all_labs[i]);
-    }
+    for (int i = 0; i < num_labs; i++)
+        Pthread_create(&labThreads[i], NULL, lab_process, &all_labs[i]);
 
-    for (int i = 0; i < num_students; i++) {
-        pthread_join(studentThreads[i], NULL);
-    }
-    for (int i = 0; i < num_labs; i++) {
-        pthread_cancel(labThreads[i]);
-    }
-    for (int i = 0; i < num_courses; i++) {
-        pthread_cancel(courseThreads[i]);
-    }
+    for (int i = 0; i < num_students; i++)
+        Pthread_join(studentThreads[i], NULL);
+
+    for (int i = 0; i < num_labs; i++)
+        Pthread_cancel(labThreads[i]);
+
+    for (int i = 0; i < num_courses; i++)
+        Pthread_cancel(courseThreads[i]);
+
     return 0;
 }
