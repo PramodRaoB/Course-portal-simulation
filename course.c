@@ -1,11 +1,11 @@
-#include <assert.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include "course.h"
+#include "globals.h"
 #include "lab.h"
 #include "wrapper.h"
-#include "globals.h"
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 Course *all_courses;
 
@@ -30,7 +30,8 @@ void course_init(int n) {
 
 void take_tutorial(Course *course) {
     int pickSlots = (rand() % course->course_max_slots) + 1;
-    printf(C_COURSE "Course %s has been allocated %d seats\n" RESET, course->name, pickSlots);
+    printf(C_COURSE "Course %s has been allocated %d seats\n" RESET, course->name,
+           pickSlots);
     Pthread_mutex_lock(&course->courseLock);
     int numAttendingTut = MIN(course->prefer, pickSlots);
     Pthread_mutex_unlock(&course->courseLock);
@@ -42,12 +43,14 @@ void take_tutorial(Course *course) {
     }
 
     Pthread_mutex_lock(&course->tutLock);
-    while(numAttendingTut != course->tutSlots)
+    while (numAttendingTut != course->tutSlots)
         Pthread_cond_wait(&course->fullCond, &course->tutLock);
     Pthread_mutex_unlock(&course->tutLock);
 
     Pthread_mutex_lock(&course->courseLock);
-    printf(C_COURSE "Tutorial has started for course %s with %d filled out of %d\n" RESET, course->name, course->tutSlots, pickSlots);
+    printf(C_COURSE
+           "Tutorial has started for course %s with %d filled out of %d\n" RESET,
+           course->name, course->tutSlots, pickSlots);
     sleep(2);
     Pthread_mutex_lock(&course->tutLock);
     for (int i = 0; i < course->tutSlots; i++) {
@@ -65,30 +68,38 @@ void *course_process(void *input) {
         found = 0;
         for (int i = 0; i < course->numValidLabs; i++) {
             Lab currentLab = all_labs[course->validLabs[i]];
-            if (!currentLab.available) continue;
+            if (!currentLab.available)
+                continue;
             for (int j = 0; j < currentLab.numTA; j++) {
-                if (currentLab.taTimes[j] == currentLab.TALimit) continue;
                 Pthread_mutex_lock(&course->courseLock);
                 while (course->prefer == 0)
                     Pthread_cond_wait(&course->emptyCond, &course->courseLock);
                 Pthread_mutex_unlock(&course->courseLock);
+                if (currentLab.taTimes[j] == currentLab.TALimit)
+                    continue;
                 Pthread_mutex_lock(&currentLab.taLock[j]);
                 found = 1;
                 if (currentLab.taTimes[j] == currentLab.TALimit) {
                     Pthread_mutex_unlock(&currentLab.taLock[j]);
                     continue;
                 }
-                printf(C_LAB "TA %d from lab %s has been allocated to course %s for %dth TAship\n" RESET, j, currentLab.name, course->name, currentLab.taTimes[j] + 1);
+                printf(C_LAB "TA %d from lab %s has been allocated to course %s for "
+                       "%dth TAship\n" RESET,
+                       j, currentLab.name, course->name, currentLab.taTimes[j] + 1);
                 take_tutorial(course);
                 currentLab.taTimes[j]++;
-                printf(C_COURSE "TA %d from lab %s has completed the tutorial and left the course %s\n" RESET, j, currentLab.name, course->name);
+                printf(C_COURSE "TA %d from lab %s has completed the tutorial and left "
+                       "the course %s\n" RESET,
+                       j, currentLab.name, course->name);
                 Pthread_mutex_unlock(&currentLab.taLock[j]);
             }
         }
     }
     Pthread_mutex_lock(&course->courseLock);
     course->withdrawn = 1;
-    printf(C_COURSE "Course %s doesn't have any TAs eligible and is removed from course offerings\n" RESET, course->name);
+    printf(C_COURSE "Course %s doesn't have any TAs eligible and is removed from "
+           "course offerings\n" RESET,
+           course->name);
     Pthread_cond_broadcast(&course->openCond);
     Pthread_mutex_unlock(&course->courseLock);
 

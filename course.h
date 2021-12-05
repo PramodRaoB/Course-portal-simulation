@@ -2,6 +2,7 @@
 #define PARALLELISM_COURSE_H
 
 #define MAX_COURSE_NAME 256
+#include "pthread.h"
 
 struct course {
     int id;

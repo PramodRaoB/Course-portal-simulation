@@ -54,16 +54,16 @@ int main() {
     pthread_t *labThreads = (pthread_t *) malloc(num_labs * sizeof(pthread_t));
     assert(labThreads);
     for (int i = 0; i < num_labs; i++)
-        Pthread_create(&labThreads[i], NULL, lab_process, &all_labs[i]);
+        pthread_create(&labThreads[i], NULL, lab_process, &all_labs[i]);
 
     for (int i = 0; i < num_students; i++)
-        Pthread_join(studentThreads[i], NULL);
+        pthread_join(studentThreads[i], NULL);
 
     for (int i = 0; i < num_labs; i++)
-        Pthread_cancel(labThreads[i]);
+        pthread_cancel(labThreads[i]);
 
     for (int i = 0; i < num_courses; i++)
-        Pthread_cancel(courseThreads[i]);
+        pthread_cancel(courseThreads[i]);
 
     return 0;
 }
